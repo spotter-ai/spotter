@@ -1,0 +1,161 @@
+#8/12/2020
+worked on getting basic environment up and running
+    - done. works
+
+#8/14/2020
+Working through getting the gripper working
+
+#8/15/2020
+implement grasping and releasing objects
+    [X] set up env to quickly test it (make gripper close enough)
+    [X] Figure out how to add joints.
+
+implement cup object
+
+#8/16/2020
+- implemented cup object
+- playing with object sizes and screen sizes.
+- resolving issue with "near_items line 277" sorting not working.
+    - resolved using the sqrd distance functionality in Vec2D
+
+#8/17/2020
+got the cup orientation to work in the observation space
+figuring out observation space
+    - feels a bit confusing.
+spoke to dan about the project
+    - many thoughts here. immediate next steps: implement actions and detectors.
+
+#8/18/2020
+Trying to deal with observation spaces
+- I currently have a dict space:
+    - maybe I need an array format
+        [
+
+#8/19/2020
+Trying to get a DQN to work with cupsworld
+    - Seems like I was able to get A2C to work ??
+        - How do I know it was working?
+        - Seems like the agent should get punished for taking more time.
+            1 - 0.9 (number of steps/ max steps)
+                maybe set the max steps to 500 or something.
+
+#8/21/2020
+Worked on algorithm
+Working on getting the overall framework working
+
+#08/26/2020
+Trying to get BFS frontier search to work
+    - looks like pyperplan implementation of operators in Task does a "relevance_analysis". See grounding.py
+        I commented that out
+
+#08/27/2020
+Implementing a backward search (from Ghallab book)
+    - Key concepts: relevant actions, regression function, and nipping
+    -
+
+#8/28/2020
+Trying to get a simple Test operator to be added to task,
+    - Issue is that it is being added, but the planner is not using it.
+    - SOLVED: it was because the planner was removing static predicates. But these are needed for generating new operators
+
+#8/31/2020
+
+# today
+
+
+Rough plan
+[X] set up bare bones gym environment
+[X] Get gripper (a kinematic body) working. This ensures that pygame and pymunk all work
+    [X] action step, render and reset should all be working in this context
+    [X] agent should be able to randomly move gripper around
+    [-] gripper group
+[x] Get platform (a static body) working with block. Check it see pymunk physics works with collisions etc.
+    - when something knocks something, its position changes
+    [X] need to make sure that we have some sort of settling time (to allow the physics to play out)
+[x] Get "grip" and "release" actions to work too.
+    - Joints being formed and removed from joint list.
+[x] Get cup object to work
+[X] Figure out observation_space and action_space.
+    - deterministic
+    - pixel array
+[X] figure out how to make sure that the step() and reset() functions output an observation space that matches the observation_space
+[x] Get stable baselines to work
+[X] Get basic planning agent to work.
+[X] Get puzzles (maybe each one is the same environment, but different rewards (dramatically different)
+    [X] talk to Shivam about reward structure -- r(s,a,s) vs r(s,a) vs r(s)
+
+
+[X] Fix Cupsworld detector to read in on(cup, block), and check the generality of the other detectors
+    - Need to fix on-detector
+[ ] Implement Explorer and SymbolicExplorer classes.
+    [X] need to look at what constitutes an anomay for strips
+
+[ ] Consider incorporating a timeout for backward search, which currently seems way too big.
+[ ] Executor class needs a executor.grounded_actions() to get all the available strings.
+    - this is so we can do RL over mid-level actions
+[ ] Design the different classes of symbolic learners
+    - Given: an operator schema, a grounded operator, an action implementation (decomposable or not)
+    - Types:
+        1: Symbolic Discovery
+            - Assumes that the agent does not need to explore the space of action implementations.
+            - Arrive at the new symbolic operator through noticing anomalies or realizing an operator is applicable in a state that was unexpected
+        2: Subsymbolic Discovery
+            - The agent will need to explore the space of subsymbolic actions
+            - Parametrized actions (go_to(object)
+            - Primitive actions (right, left, up, down)
+    [ ] L0 - goal: (on block cup)  or (on cup block) -- need to discover "stack_on_cup"
+        - new operator with same exact underlying midlevel action script
+    [ ] L0 - goal: (inside block cup) -- need to discover "cover" or "dropin"
+        - new
+    [ ] L2 - goal: (upright cup)
+[ ] PDDLGym integration
+[ ] Fix checking mode. need to handle anomalies
+    - Basic idea is to allow for learning "cover" action which is just like stack but has some additional stuff
+    - Learns cover by accident
+    - But now that it knows it can get "inside" to be true, maybe it can design an experiment to see if it works on other blocks
+        - automatically invent new operators
+        - So it would automatically
+    - Heuristics
+        (1) Try on other objects
+        (2) identify fluents that are currently deemed to be static fluents....need to investigate whether truly static
+[ ] Develop classification of goals
+    (1) Straightforward planning goal....reachable condition
+    (2) Learning opportunity goals: goals, the pursuit of which, will likely lead agent to discovering an anomaly with its domain
+        Teacher knows what the agent does not know..
+    (3) Unreachable goal
+        - Might be too hard without having previously pursued a learning opportunity goal
+[ ] Submit AAAI abstract
+[ ] Implement symbolic explorer
+    [ ] Design a way to evaluate it -- domain-mods that feature a particular anomaly, and goals that test these
+           [ ] Anomalies: fluent added/removed from add/del effects
+           [ ] Maybe think about autogenerating domain-mods
+    [ ] Implement PDDLGymDetector and PDDLGymExecutor
+
+
+Goals
+- (on cup block_red) {this is a learning op goal if the cup is facedown}
+- (on cup block_red) (upright cup)
+- (on block_red cup)
+
+
+
+
+
+Ideas:
+Can the agent discover that the stack action can work on cups too, when they are facedown? This is a purely symbolic search
+    Operator modifications
+    - purely symbolic reassignment
+        - E.g., Learning "cover"
+            - Discover new type assignment for parameters (e.g., stack action works for cups too...let's call it "cover")
+            - Different operator because need to add missing precondition (facedown) and missing add_effect (inside)
+        - E.g., Learning "stack_on_cup"
+            - Requires that cup be facedown,
+        - E.g., Learning "dropin"
+        - In all these cases, there is really no low/mid-level learning of actions. Just operators.
+    - discovery of an operator with a different arrangement of mid level stuff
+        - E.g.,
+    - discovery of new implementations
+
+Types of experiments
+    - Explore "what if" I
+

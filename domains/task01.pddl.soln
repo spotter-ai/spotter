@@ -1,0 +1,5 @@
+(pickup c)
+(flipup c)
+(putdown c)
+(pickup b)
+(dropin b c)

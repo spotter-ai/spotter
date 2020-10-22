@@ -1,0 +1,124 @@
+EVALUATION PLAN
+
+Curriculum
+Starting world state: 2 blocks and upside down cup
+
+0. Puzzle 0: (planning alone)
+ -- basic blocks world
+ -- goals: red on blue ==> There exists some ob1, ob2, s.t., on(ob1, ob2), color(ob1, red), color(ob2, blue)
+    solution: pickup(ob1), stack(ob1, ob2).
+ -- puzzle variations --> can handle all of these (is there an automatic way to generate variations)
+
+1. Puzzle 1 (planning alone) [with Cup]
+- Put block inside cup
+ -- Planner picks up cup, places it on top of a block
+ -- goal: inside(cup, block)
+ -- pickup(cup), cover(cup, block)
+
+
+2. Puzzle 2 (option discovery)
+ -- Put block inside cup and have it upright
+ -- goal: inside(cup, block), upright(cup)
+ -- >> requires discovery of flip
+
+3. Puzzle 3 (planning alone)
+  Have all the objects not on the table.
+  >> requires using flip for something else
+  -- goal: inside(cup, ob1), inside(cup, ob2)
+
+constants:
+proximty threshold: predefined distance for when something is close
+
+Predicate definitions:
+ontable(obj): no object between obj and platform, and within y-proximity threshold
+clear(obj): no object above obj
+    - careful to ensure that we are measuring above any wall of the cup
+empty: gripper not grasped anything
+holding(obj): gripper grasped particular object, and object greater than y-proximity threshold of other objects
+inside(obj, cup): x, y, locations of the objects within a certain proximity threshold
+    - or three of the walls of the cup surround the object
+upright(cup):
+facedown(cup):
+color(obj): color of object
+block(obj): object is a block
+cup(obj): object is a cup
+
+
+Low level actions
+- goTo(obj): go close above a object
+    - make a beeline for a particular position in space above that particular object
+        - retrieve gripper position and the object position.
+        - generate a path of positions connecting these two points
+               Bresenham's algorithm: https://stackoverflow.com/questions/13055657/finding-integer-coordinates-between-2-points
+        - alternatively just move in straight lines
+            - if y_end > y_start:
+                move up to y_end first
+            - else:
+                move right or left to x first
+                then move down to y_end
+
+- goToEmpty: go to empty spot on the platform
+    - find all the gaps between objects and between the sides
+    - choose a gap that is wide enough
+    - navigate to a high y-location above the x center point of that gap.
+
+- grasp:
+
+- lift: move up a certain amount
+- lower: move down a certain amount
+- goAbove(obj): like goTo but go higher above the object)
+
+Action Schema:
+Pickup (obj):
+    pre: clear(obj), emptyhand
+    add: holding(obj)
+    del: not clear(obj)
+    implementation: goTo(obj), grasp, lift
+
+Putdown(obj)
+    implementation: goToEmpty, lower, release
+
+stack(ob1, ob2) ==> only available for blocks
+    implementation: goAbove(ob2), release
+
+unstack(ob1, ob2) ==> only available for blocks
+    implementation: goTo(ob2), grab, lift
+
+cover(cup, blk) ==>
+   pre: holding cup, not upright
+   implementation: goAbove(blk), release
+   add: inside(cup, blk)
+
+dropin(blk, cup) ==>
+    pre: holding block, upright cup
+    implementation: goAbove(cup), release
+    add: inside(cup, blk)
+
+No flip action available --> need to discover this.
+
+>> Need an algorithm to find which of the forward frontier states is closes to the backward frontier.
+    - i.e., closest point with which to build a bridge
+
+=====
+
+Detectors.py
+    - Given a low level observation, domain bias, returns
+        - Frame: objects: <extracted from obs>, actions (extracted from domain bias), predicates (from domain bias)
+        - State: set of predicates true of state (color obj1 red),
+    - conceptualize()
+
+Executor.py / self.brain.motor
+    - contains all the hardcoded actions
+    - No precondition checks...just implementations that WILL be executed
+    - E.g., actions.stack(
+
+detectors = Detectors(domain_bias)
+state, frame = detectors.detect(obs)
+
+executor = Executor()
+
+
+-============
+Agent needs to discover that
+- how to flip the cup
+- Then replan to see if it can up

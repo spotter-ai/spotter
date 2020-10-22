@@ -1,0 +1,6 @@
+*.pyc*
+domains/problem.pddl
+*.log
+*.pddl.soln
+*.prof
+results/

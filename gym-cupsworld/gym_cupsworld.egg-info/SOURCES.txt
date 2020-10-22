@@ -1,0 +1,7 @@
+README.md
+setup.py
+gym_cupsworld.egg-info/PKG-INFO
+gym_cupsworld.egg-info/SOURCES.txt
+gym_cupsworld.egg-info/dependency_links.txt
+gym_cupsworld.egg-info/requires.txt
+gym_cupsworld.egg-info/top_level.txt

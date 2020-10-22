@@ -1,0 +1,55 @@
+Design specs for the agent
+
+Modes:
+ - "Plan": attempt to plan (return frontier states if planning fails
+ - "Learn": Given frontier states, discover options
+ - "Update": domain model after a few iterations
+
+  - "Execute":
+        - high level actions
+        - low level actions
+
+  - "Detect"
+
+Reasoner:
+    - * focused mode: plan
+    - learning mode: hypothesize things to assist with targeted exploration
+
+Discoverer:
+    - focused mode: executing options
+    - * defocused mode: learning options
+
+maybe discoverer and executor are the same thing -- maybe
+
+
+
+Agent steps
+1. Receives goal
+2. Prepares task by querying environment, and formulating task
+3. Run search + exploration
+
+Basic skills:
+
+
+1. Prepare task
+    - Get initial condition by
+        - looking at domain file
+        - getting detectors
+        - reading
+
+
+Detectors
+
+detectors = Detectors()
+detectors.activate(
+
+empty = EmptyDetector()
+
+
+left to right => +x
+bottom to top => +y
+
+
+
+
+
